@@ -8,13 +8,19 @@ from .abc import Consumer, Node, Part, Producer
 class Station(Node, Consumer, Producer):
     """A node that processes a part, requiring a resource and taking time."""
 
-    def __init__(self, env: simpy.Environment, name: str, processing_time: float = 1.0, capacity: int = 1) -> None:
+    def __init__(
+        self,
+        env: simpy.Environment,
+        name: str,
+        processing_time: float = 1.0,
+        capacity: int = 1,
+    ) -> None:
         super().__init__(env, name)
 
         self.output_target: Consumer | None = None
         self.processing_time = processing_time
         self.resource = simpy.Resource(env, capacity=capacity)
-    
+
     def set_output(self, output_target: Consumer) -> None:
         self.output_target = output_target
 

@@ -1,12 +1,13 @@
-from abc import ABC, abstractmethod
-from typing import TypedDict, Any
 import uuid
+from abc import ABC, abstractmethod
+from typing import Any, TypedDict
 
 import simpy
 
 
 class Part(TypedDict):
     """Represents a part being processed in the simulation."""
+
     id: uuid.UUID
     creation_time: float
 
@@ -18,7 +19,6 @@ class Node:
         self.id = uuid.uuid4()
         self.env = env
         self.name = name
-
 
 
 class Consumer(ABC):
@@ -34,6 +34,7 @@ class Producer(ABC):
     """
     Mixin for a Node that sends parts to other Nodes.
     """
+
     @abstractmethod
     def set_output(self, output_target: Consumer) -> None:
         """Add a node to this producer's output set."""

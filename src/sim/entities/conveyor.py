@@ -6,9 +6,13 @@ from .abc import Consumer, Node, Part, Producer
 
 
 class Conveyor(Node, Consumer, Producer):
-    """A node that transports a part for a specified travel time before passing it on."""
-
-    def __init__(self, env: simpy.Environment, name: str, travel_time: float = 1.0, capacity: int = 1) -> None:
+    def __init__(
+        self,
+        env: simpy.Environment,
+        name: str,
+        travel_time: float = 1.0,
+        capacity: int = 1,
+    ) -> None:
         super().__init__(env, name)
 
         self.travel_time = travel_time

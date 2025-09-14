@@ -1,5 +1,5 @@
-from typing import Literal
 import random
+from typing import Literal
 
 import simpy
 
@@ -11,7 +11,12 @@ RoutingLogic = Literal["round_robin", "random"]
 class Router(Node, Consumer, Producer):
     """A node that routes a part to one of several outputs based on a defined logic."""
 
-    def __init__(self, env: simpy.Environment, name: str, routing_logic: RoutingLogic = "round_robin") -> None:
+    def __init__(
+        self,
+        env: simpy.Environment,
+        name: str,
+        routing_logic: RoutingLogic = "round_robin",
+    ) -> None:
         super().__init__(env, name)
 
         self.output_targets: list[Consumer] = []
@@ -21,7 +26,7 @@ class Router(Node, Consumer, Producer):
 
     def set_output(self, output_target: Consumer) -> None:
         self.output_targets.append(output_target)
-    
+
     def put(self, part: Part) -> None:
         """Receives a part and routes it to a downstream component."""
         if not self.output_targets:

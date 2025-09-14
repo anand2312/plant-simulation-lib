@@ -12,6 +12,9 @@ from .entities.source import Source
 from .entities.station import Station
 from .entities.store import Store
 
+__all__ = ["PlantBuilder"]
+
+
 COMPONENT_MAP: dict[str, type[Node]] = {
     "Source": Source,
     "Drain": Drain,

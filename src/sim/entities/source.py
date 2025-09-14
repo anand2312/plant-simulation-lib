@@ -1,5 +1,5 @@
-from typing import Generator
 import uuid
+from typing import Generator
 
 import simpy
 
@@ -7,9 +7,14 @@ from .abc import Consumer, Node, Part, Producer
 
 
 class Source(Node, Producer):
-    """A node that generates parts at a specified interval and sends them to an output."""
-
-    def __init__(self, env: simpy.Environment, name: str, interval: float = 1.0, limit: int | None = None, start_immedietely: bool = True) -> None:
+    def __init__(
+        self,
+        env: simpy.Environment,
+        name: str,
+        interval: float = 1.0,
+        limit: int | None = None,
+        start_immedietely: bool = True,
+    ) -> None:
         super().__init__(env, name)
 
         # Configurable parameters from the JSON file
@@ -17,10 +22,10 @@ class Source(Node, Producer):
         self.limit = limit
 
         self.parts_created: int = 0
-    
+
         if start_immedietely:
             self.start()
-    
+
     def set_output(self, output_target: Consumer) -> None:
         self.output_target = output_target
 

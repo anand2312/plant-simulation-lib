@@ -10,7 +10,9 @@ class Store(Node, Consumer, Producer):
     It wraps a `simpy.Store`.
     """
 
-    def __init__(self, env: simpy.Environment, name: str, capacity: float = float("inf")) -> None:
+    def __init__(
+        self, env: simpy.Environment, name: str, capacity: float = float("inf")
+    ) -> None:
         super().__init__(env, name)
         self.store = simpy.Store(env, capacity=capacity)
 
