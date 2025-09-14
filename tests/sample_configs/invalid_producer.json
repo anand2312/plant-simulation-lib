@@ -1,0 +1,13 @@
+{
+    "components": [
+        {
+            "name": "drain",
+            "type": "Drain",
+            "outputs": "source"
+        },
+        {
+            "name": "source",
+            "type": "Source"
+        }
+    ]
+}
