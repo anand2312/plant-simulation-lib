@@ -1,2 +1,3 @@
-def main() -> None:
-    print("Hello from sim!")
+from .simulation import Simulation
+
+__all__ = ["Simulation"]

@@ -23,3 +23,16 @@ dev = [
     "pre-commit>=4.3.0",
     "ruff>=0.13.0",
 ]
+
+[tool.ruff]
+lint.select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # Pyflakes
+    "I",  # isort
+    "C",  # flake8-comprehensions
+    "B",  # flake8-bugbear
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["sim"]

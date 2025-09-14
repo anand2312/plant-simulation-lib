@@ -1,15 +1,16 @@
 import json
-import simpy
+from pathlib import Path
 from typing import Any
 
-from .entities.abc import Node, Producer, Consumer
-from .entities.source import Source
-from .entities.drain import Drain
-from .entities.conveyor import Conveyor
-from .entities.station import Station
-from .entities.router import Router
-from .entities.store import Store
+import simpy
 
+from .entities.abc import Consumer, Node, Producer
+from .entities.conveyor import Conveyor
+from .entities.drain import Drain
+from .entities.router import Router
+from .entities.source import Source
+from .entities.station import Station
+from .entities.store import Store
 
 COMPONENT_MAP: dict[str, type[Node]] = {
     "Source": Source,
@@ -34,7 +35,7 @@ class PlantBuilder:
         self.env = env
         self.components: dict[str, Node] = {}
 
-    def build_from_json(self, filepath: str) -> dict[str, Node]:
+    def build_from_json(self, filepath: str | Path) -> dict[str, Node]:
         """
         Builds and wires a plant from a JSON config file.
 
@@ -42,7 +43,7 @@ class PlantBuilder:
         1. Instantiate all component objects.
         2. Connect the outputs of producers to the inputs of consumers.
         """
-        with open(filepath, 'r') as f:
+        with open(filepath, "r") as f:
             config = json.load(f)
 
         self._instantiate_components(config["components"])
@@ -66,7 +67,7 @@ class PlantBuilder:
 
             cls = COMPONENT_MAP[comp_type]
             component = cls(env=self.env, name=name, **params)
-            
+
             self.components[name] = component
 
     def _wire_components(self, component_configs: list[dict[str, Any]]) -> None:
@@ -93,12 +94,12 @@ class PlantBuilder:
                         f"Component '{source_name}' has an unknown output "
                         f"target: '{target_name}'"
                     )
-                
+
                 target_component = self.components[target_name]
 
                 if not isinstance(target_component, Consumer):
                     raise TypeError(
                         f"Output target '{target_name}' is not a valid Consumer."
                     )
-                
+
                 source_component.set_output(target_component)
