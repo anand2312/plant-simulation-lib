@@ -1,9 +1,12 @@
+import logging
 import uuid
 from typing import Generator
 
 import simpy
 
 from .abc import Consumer, Node, Part, Producer
+
+logger = logging.getLogger(__name__)
 
 
 class Source(Node, Producer):
@@ -13,7 +16,7 @@ class Source(Node, Producer):
         name: str,
         interval: float = 1.0,
         limit: int | None = None,
-        start_immedietely: bool = True,
+        start_immediately: bool = True,
     ) -> None:
         super().__init__(env, name)
 
@@ -23,14 +26,19 @@ class Source(Node, Producer):
 
         self.parts_created: int = 0
 
-        if start_immedietely:
+        logger.info(f"Source '{name}' initialized: interval={interval}, limit={limit}")
+
+        if start_immediately:
             self.start()
 
     def set_output(self, output_target: Consumer) -> None:
         self.output_target = output_target
+        target_name = getattr(output_target, "name", str(output_target))
+        logger.debug(f"Source '{self.name}' output set to '{target_name}'")
 
     def start(self) -> None:
         """Explicitly starts the part generation process."""
+        logger.info(f"Source '{self.name}' starting part generation")
         self.env.process(self.run())
 
     def run(self) -> Generator:
@@ -45,5 +53,14 @@ class Source(Node, Producer):
                 "creation_time": self.env.now,
             }
 
-            if self.output_target:
-                self.output_target.put(part)
+            if self.output_target is None:
+                raise RuntimeError(f"Source '{self.name}' has no output target")
+
+            part_id = part["id"]
+            logger.debug(
+                f"Source '{self.name}' created part {part_id} at T={self.env.now}"
+            )
+            self.output_target.put(part)
+
+        parts_count = self.parts_created
+        logger.info(f"Source '{self.name}' finished generating {parts_count} parts")

@@ -1,9 +1,12 @@
+import logging
 import random
 from typing import Literal
 
 import simpy
 
 from .abc import Consumer, Node, Part, Producer
+
+logger = logging.getLogger(__name__)
 
 RoutingLogic = Literal["round_robin", "random"]
 
@@ -20,28 +23,45 @@ class Router(Node, Consumer, Producer):
         super().__init__(env, name)
 
         self.output_targets: list[Consumer] = []
-
         self.logic = routing_logic
         self.next_target_idx = 0
+
+        logger.info(f"Router '{name}' initialized with {routing_logic} logic")
 
     def set_output(self, output_target: Consumer) -> None:
         self.output_targets.append(output_target)
 
     def put(self, part: Part) -> None:
         """Receives a part and routes it to a downstream component."""
+        part_id = part["id"]
+
         if not self.output_targets:
-            # No outputs configured, so the part is discarded.
+            logger.warning(
+                f"Router '{self.name}' discarding part {part_id} - no outputs"
+            )
             return
 
         if self.logic == "round_robin":
             target = self.output_targets[self.next_target_idx]
+            target_name = getattr(target, "name", str(target))
+            logger.debug(
+                f"Router '{self.name}' routing {part_id} to {target_name} (round_robin)"
+            )
             target.put(part)
             self.next_target_idx = (self.next_target_idx + 1) % len(self.output_targets)
 
         elif self.logic == "random":
             target = random.choice(self.output_targets)
+            target_name = getattr(target, "name", str(target))
+            logger.debug(
+                f"Router '{self.name}' routing {part_id} to {target_name} (random)"
+            )
             target.put(part)
 
         else:
-            # If logic is unknown or unsupported, default to the first output
-            self.output_targets[0].put(part)
+            target = self.output_targets[0]
+            target_name = getattr(target, "name", str(target))
+            logger.debug(
+                f"Router '{self.name}' routing {part_id} to {target_name} (default)"
+            )
+            target.put(part)

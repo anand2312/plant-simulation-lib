@@ -1,4 +1,5 @@
 import json
+import logging
 from pathlib import Path
 from typing import Any
 
@@ -11,6 +12,8 @@ from .entities.router import Router
 from .entities.source import Source
 from .entities.station import Station
 from .entities.store import Store
+
+logger = logging.getLogger(__name__)
 
 __all__ = ["PlantBuilder"]
 
@@ -37,6 +40,7 @@ class PlantBuilder:
     def __init__(self, env: simpy.Environment) -> None:
         self.env = env
         self.components: dict[str, Node] = {}
+        logger.debug("PlantBuilder initialized")
 
     def build_from_json(self, filepath: str | Path) -> dict[str, Node]:
         """
@@ -46,20 +50,29 @@ class PlantBuilder:
         1. Instantiate all component objects.
         2. Connect the outputs of producers to the inputs of consumers.
         """
+        logger.info(f"Building plant from JSON config: {filepath}")
         with open(filepath, "r") as f:
             config = json.load(f)
+
+        component_count = len(config.get("components", []))
+        logger.info(f"Found {component_count} components to build")
 
         self._instantiate_components(config["components"])
         self._wire_components(config["components"])
 
+        logger.info(f"Plant built successfully with {len(self.components)} components")
         return self.components
 
     def build_from_dict(self, obj: dict[str, Any]) -> dict[str, Node]:
+        comp_count = len(obj.get("components", []))
+        logger.info(f"Building plant from dict config with {comp_count} components")
         self._instantiate_components(obj["components"])
         self._wire_components(obj["components"])
+        logger.info(f"Plant built successfully with {len(self.components)} components")
         return self.components
 
     def _instantiate_components(self, component_configs: list[dict[str, Any]]) -> None:
+        logger.debug("Starting component instantiation phase")
         for config in component_configs:
             name = config["name"]
             comp_type = config["type"]
@@ -70,10 +83,14 @@ class PlantBuilder:
 
             cls = COMPONENT_MAP[comp_type]
             component = cls(env=self.env, name=name, **params)
-
             self.components[name] = component
 
+            logger.debug(f"Created {comp_type} '{name}' with params: {params}")
+
     def _wire_components(self, component_configs: list[dict[str, Any]]) -> None:
+        logger.debug("Starting component wiring phase")
+        connection_count = 0
+
         for config in component_configs:
             if "outputs" not in config:
                 continue
@@ -106,3 +123,7 @@ class PlantBuilder:
                     )
 
                 source_component.set_output(target_component)
+                connection_count += 1
+                logger.debug(f"Connected {source_name} -> {target_name}")
+
+        logger.info(f"Wiring completed: {connection_count} connections established")

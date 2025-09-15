@@ -1,6 +1,10 @@
+import logging
+
 import simpy
 
 from .abc import Consumer, Node, Part
+
+logger = logging.getLogger(__name__)
 
 
 class Drain(Node, Consumer):
@@ -8,10 +12,19 @@ class Drain(Node, Consumer):
         super().__init__(env, name)
         # Store tuples of (part, arrival_time) for statistics
         self.log: list[tuple[Part, float]] = []
+        logger.info(f"Drain '{name}' initialized")
 
     def put(self, part: Part) -> None:
         """Receives a part and logs its arrival time."""
         self.log.append((part, self.env.now))
+        part_id = part["id"]
+        latency = self.env.now - part["creation_time"]
+        logger.debug(
+            f"Drain '{self.name}' received part {part_id} (latency={latency:.2f})"
+        )
+
+        if len(self.log) % 10 == 0:  # Log every 10 parts
+            logger.info(f"Drain '{self.name}' has received {len(self.log)} parts total")
 
     @property
     def parts_received(self) -> int:

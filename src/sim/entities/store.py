@@ -29,3 +29,7 @@ class Store(Node, Consumer, Producer):
         that must be yielded by a process to wait for a part to become available.
         """
         return self.store.get()
+
+    def set_output(self, output_target: Consumer) -> None:
+        """Set the output target for this store."""
+        self.output_target = output_target

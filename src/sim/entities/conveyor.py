@@ -1,8 +1,11 @@
+import logging
 from typing import Generator
 
 import simpy
 
 from .abc import Consumer, Node, Part, Producer
+
+logger = logging.getLogger(__name__)
 
 
 class Conveyor(Node, Consumer, Producer):
@@ -17,19 +20,31 @@ class Conveyor(Node, Consumer, Producer):
 
         self.travel_time = travel_time
         self.resource = simpy.Resource(env, capacity=capacity)
+        logger.info(
+            f"Conveyor '{name}' initialized: travel_time={travel_time},"
+            f" capacity={capacity}"
+        )
 
     def set_output(self, output_target: Consumer) -> None:
         self.output_target = output_target
 
     def put(self, part: Part) -> None:
         """Receives a part and starts the transport process."""
+        part_id = part["id"]
+        logger.debug(f"Conveyor '{self.name}' received part {part_id} for transport")
         self.env.process(self.transport(part))
 
     def transport(self, part: Part) -> Generator:
         """The simulation process for moving a part along the conveyor."""
+        part_id = part["id"]
+
         with self.resource.request() as request:
             yield request
+            logger.debug(
+                f"Conveyor '{self.name}' transporting {part_id} at T={self.env.now}"
+            )
             yield self.env.timeout(self.travel_time)
 
+        logger.debug(f"Conveyor '{self.name}' completed transport of {part_id}")
         if self.output_target:
             self.output_target.put(part)
