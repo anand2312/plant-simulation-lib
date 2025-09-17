@@ -6,15 +6,17 @@ import simpy
 
 from .builder import PlantBuilder
 from .entities.abc import Node
-from .entities.drain import Drain
 
 logger = logging.getLogger(__name__)
 
 
-class DrainResults(TypedDict):
+class ComponentStats(TypedDict):
     parts_received: int
-    avg_throughput: float
+    parts_sent: int
+    throughput: float
     avg_latency: float
+    max_latency: float
+    utilization_time: float
 
 
 class Simulation:
@@ -41,37 +43,43 @@ class Simulation:
         self.env.run(until=until)
         logger.info(f"Simulation completed at time {self.env.now}")
 
-    def get_results(self) -> dict[str, DrainResults]:
+    def get_results(self) -> dict[str, ComponentStats]:
         """
-        Collects and returns results from the simulation, primarily from Drain nodes.
+        Collects and returns statistics from all simulation components.
         """
-        results: dict[str, DrainResults] = {}
-        drain_count = 0
+        results: dict[str, ComponentStats] = {}
+
         for name, component in self.components.items():
-            if isinstance(component, Drain):
-                drain_count += 1
-                parts_received = component.parts_received
-                avg_throughput = component.get_average_throughput()
-                avg_latency = component.get_average_latency()
+            parts_received = component.parts_received
+            parts_sent = component.parts_sent
+            throughput = component.get_throughput()
+            avg_latency = component.get_average_latency()
+            max_latency = component.get_max_latency()
+            utilization_time = component.get_utilization_time()
 
-                results[name] = {
-                    "parts_received": parts_received,
-                    "avg_throughput": avg_throughput,
-                    "avg_latency": avg_latency,
-                }
+            results[name] = {
+                "parts_received": parts_received,
+                "parts_sent": parts_sent,
+                "throughput": throughput,
+                "avg_latency": avg_latency,
+                "max_latency": max_latency,
+                "utilization_time": utilization_time,
+            }
 
-                logger.info(
-                    f"Drain '{name}' results: {parts_received} parts, "
-                    f"throughput={avg_throughput:.3f}/time, latency={avg_latency:.3f}"
-                )
+            logger.info(
+                f"Component '{name}' stats: received={parts_received}, "
+                f"sent={parts_sent}, throughput={throughput:.3f}/time, "
+                f"avg_latency={avg_latency:.3f}, max_latency={max_latency:.3f}, "
+                f"utilization={utilization_time:.3f}"
+            )
 
-        logger.info(f"Collected results from {drain_count} drain components")
+        logger.info(f"Collected statistics from {len(results)} components")
         return results
 
     @classmethod
     def run_from_file(
         cls, filepath: str | Path, until: int | float
-    ) -> dict[str, DrainResults]:
+    ) -> dict[str, ComponentStats]:
         """
         Loads a config from a file, runs the simulation, and returns the results.
         """
