@@ -38,7 +38,7 @@ Generates parts at a regular interval.
 - **`params`**:
   - `interval` (float, optional, default: `1.0`): The time (in simulation units) between part generations.
   - `limit` (integer, optional, default: `null`): The maximum number of parts to generate. If `null`, generates indefinitely.
-  - `start_immedietely` (boolean, optional, default: `true`): If `true`, starts generating parts at t=0.
+  - `start_immediately` (boolean, optional, default: `true`): If `true`, starts generating parts at t=0.
 
 ### `Drain`
 Consumes and removes parts from the simulation, recording statistics.
