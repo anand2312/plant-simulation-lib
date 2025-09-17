@@ -91,7 +91,7 @@ class PlantBuilder:
         connection_count = 0
 
         for config in component_configs:
-            if "outputs" not in config:
+            if "outputs" not in config or not config["outputs"]:
                 continue
 
             source_name = config["name"]
