@@ -34,6 +34,7 @@ class Station(Node, Consumer, Producer):
 
     def put(self, part: Part) -> None:
         """Receives a part and starts the processing workflow."""
+        self._record_part_received(part)
         part_id = part["id"]
         logger.debug(f"Station '{self.name}' received part {part_id} for processing")
         self.env.process(self.process_part(part))
@@ -56,4 +57,5 @@ class Station(Node, Consumer, Producer):
             )
 
         if self.output_target:
+            self._record_part_sent(part)
             self.output_target.put(part)

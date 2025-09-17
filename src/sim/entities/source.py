@@ -60,6 +60,7 @@ class Source(Node, Producer):
             logger.debug(
                 f"Source '{self.name}' created part {part_id} at T={self.env.now}"
             )
+            self._record_part_sent(part)
             self.output_target.put(part)
 
         parts_count = self.parts_created

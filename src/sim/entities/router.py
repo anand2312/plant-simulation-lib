@@ -33,6 +33,7 @@ class Router(Node, Consumer, Producer):
 
     def put(self, part: Part) -> None:
         """Receives a part and routes it to a downstream component."""
+        self._record_part_received(part)
         part_id = part["id"]
 
         if not self.output_targets:
@@ -47,6 +48,7 @@ class Router(Node, Consumer, Producer):
             logger.debug(
                 f"Router '{self.name}' routing {part_id} to {target_name} (round_robin)"
             )
+            self._record_part_sent(part)
             target.put(part)
             self.next_target_idx = (self.next_target_idx + 1) % len(self.output_targets)
 
@@ -56,6 +58,7 @@ class Router(Node, Consumer, Producer):
             logger.debug(
                 f"Router '{self.name}' routing {part_id} to {target_name} (random)"
             )
+            self._record_part_sent(part)
             target.put(part)
 
         else:
@@ -64,4 +67,5 @@ class Router(Node, Consumer, Producer):
             logger.debug(
                 f"Router '{self.name}' routing {part_id} to {target_name} (default)"
             )
+            self._record_part_sent(part)
             target.put(part)

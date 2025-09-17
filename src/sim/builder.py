@@ -11,7 +11,6 @@ from .entities.drain import Drain
 from .entities.router import Router
 from .entities.source import Source
 from .entities.station import Station
-from .entities.store import Store
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +23,7 @@ COMPONENT_MAP: dict[str, type[Node]] = {
     "Conveyor": Conveyor,
     "Station": Station,
     "Router": Router,
-    "Store": Store,
+    # "Store": Store,
 }
 
 

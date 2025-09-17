@@ -30,6 +30,7 @@ class Conveyor(Node, Consumer, Producer):
 
     def put(self, part: Part) -> None:
         """Receives a part and starts the transport process."""
+        self._record_part_received(part)
         part_id = part["id"]
         logger.debug(f"Conveyor '{self.name}' received part {part_id} for transport")
         self.env.process(self.transport(part))
@@ -47,4 +48,5 @@ class Conveyor(Node, Consumer, Producer):
 
         logger.debug(f"Conveyor '{self.name}' completed transport of {part_id}")
         if self.output_target:
+            self._record_part_sent(part)
             self.output_target.put(part)

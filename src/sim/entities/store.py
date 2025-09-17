@@ -21,6 +21,7 @@ class Store(Node, Consumer, Producer):
         Adds a part to the store. Returns a `StorePut` event that can be yielded
         to wait for the store to have available capacity.
         """
+        self._record_part_received(part)
         return self.store.put(part)
 
     def get(self) -> StoreGet:

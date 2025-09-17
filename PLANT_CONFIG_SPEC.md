@@ -61,10 +61,6 @@ Routes incoming parts to one of several downstream components.
 - **`params`**:
   - `routing_logic` (string, optional, default: `"round_robin"`): The logic to use for routing. Valid options are `"round_robin"` and `"random"`.
 
-### `Store`
-Acts as a buffer or warehouse that can hold parts.
-- **`params`**:
-  - `capacity` (float, optional, default: `Infinity`): The maximum number of parts the store can hold.
 
 ---
 
