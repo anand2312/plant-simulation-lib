@@ -1,9 +1,0 @@
-{
-    "components": [
-        {
-            "name": "source",
-            "type": "Source",
-            "outputs": "non_existent_drain"
-        }
-    ]
-}
