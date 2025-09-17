@@ -76,7 +76,7 @@ def submit_flow(flow:dict):
     # print(config.Sources)
     # print(config.Drains)
     sim=Simulator.Simulator()
-    sim.StartSimulation(100)
+    sim.StartSimulation(100000)
     for source in config.Sources:
         source.PrintStatistics()
     
@@ -88,7 +88,22 @@ def submit_flow(flow:dict):
     
     for drain in config.Drains:
         drain.PrintStatistics()
+    
+    SourceStats={}
+    ConveyorStats={}
+    StationStats={}
+    DrainStats={}
+    response={}
+    for source in config.Sources:
+        SourceStats[source.id]={"Generated":source.OrdersGenerated}
+    for conveyor in config.Conveyors:
+        ConveyorStats[conveyor.id]={"OrdersProcessed":conveyor.OrdersProcessed,"OrdersRecieved":conveyor.OrdersRecieved}
+    for station in config.Stations:
+        StationStats[station.id]={"OrdersProcessed":station.OrdersProcessed,"OrdersRecieved":station.OrdersRecieved}
+    for drain in config.Drains:
+        DrainStats[drain.id]={"OrdersProcessed":drain.OrdersProcessed,"OrdersRecieved":drain.OrdersRecieved}
+    response_dict={"Sources":SourceStats,"Conveyors":ConveyorStats,"Stations":StationStats,"Drains":DrainStats}
+    print(response_dict)
     return {
-        "success": True,
-        # "components": all_components
+        json.dumps(response_dict)
     }
