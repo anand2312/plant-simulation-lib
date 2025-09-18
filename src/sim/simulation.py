@@ -52,7 +52,10 @@ class Simulation:
         for name, component in self.components.items():
             parts_received = component.parts_received
             parts_sent = component.parts_sent
-            throughput = component.get_throughput()
+            try:
+                throughput = component.get_throughput()
+            except ZeroDivisionError:
+                throughput = float("nan")
             avg_latency = component.get_average_latency()
             max_latency = component.get_max_latency()
             utilization_time = component.get_utilization_time()

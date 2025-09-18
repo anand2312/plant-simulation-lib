@@ -8,7 +8,8 @@ import simpy
 from .entities.abc import Consumer, Node, Producer
 from .entities.conveyor import Conveyor
 from .entities.drain import Drain
-from .entities.router import Router
+
+# from .entities.router import Router
 from .entities.source import Source
 from .entities.station import Station
 
@@ -22,7 +23,7 @@ COMPONENT_MAP: dict[str, type[Node]] = {
     "Drain": Drain,
     "Conveyor": Conveyor,
     "Station": Station,
-    "Router": Router,
+    # "Router": Router,
     # "Store": Store,
 }
 

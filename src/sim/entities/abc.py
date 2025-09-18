@@ -1,8 +1,15 @@
+import random
 import uuid
 from abc import ABC, abstractmethod
-from typing import Any, TypedDict
+from logging import getLogger
+from typing import Any, Literal, TypedDict
 
 import simpy
+
+RoutingLogic = Literal["round_robin", "random"]
+
+
+logger = getLogger(__name__)
 
 
 class Part(TypedDict):
@@ -46,7 +53,7 @@ class Node:
         """Calculate throughput (parts per time unit)."""
         if self.env.now == 0:
             return 0.0
-        return self.parts_received / self.env.now
+        return self.parts_sent / self.parts_received
 
     def get_average_latency(self) -> float:
         """Calculate average latency for received parts."""
@@ -93,7 +100,50 @@ class Producer(ABC):
     Mixin for a Node that sends parts to other Nodes.
     """
 
+    output_targets: list[Consumer]
+    routing_strategy: RoutingLogic
+    next_target_idx: int
+    name: str
+
     @abstractmethod
     def set_output(self, output_target: Consumer) -> None:
         """Add a node to this producer's output set."""
         pass
+
+    def route_part(self, part: Part) -> None:
+        """
+        Apply the appropriate routing strategy and send the part to the next node.
+        """
+        part_id = part["id"]
+
+        if not self.output_targets:
+            logger.warning(f"Node '{self.name}' discarding part {part_id} - no outputs")
+            return
+
+        if self.routing_strategy == "round_robin":
+            target = self.output_targets[self.next_target_idx]
+            target_name = getattr(target, "name", str(target))
+            logger.debug(
+                f"Node '{self.name}' routing {part_id} to {target_name} (round_robin)"
+            )
+            # self._record_part_sent(part)
+            target.put(part)
+            self.next_target_idx = (self.next_target_idx + 1) % len(self.output_targets)
+
+        elif self.routing_strategy == "random":
+            target = random.choice(self.output_targets)
+            target_name = getattr(target, "name", str(target))
+            logger.debug(
+                f"Node '{self.name}' routing {part_id} to {target_name} (random)"
+            )
+            # self._record_part_sent(part)
+            target.put(part)
+
+        else:
+            target = self.output_targets[0]
+            target_name = getattr(target, "name", str(target))
+            logger.debug(
+                f"Router '{self.name}' routing {part_id} to {target_name} (default)"
+            )
+            # self._record_part_sent(part)
+            target.put(part)

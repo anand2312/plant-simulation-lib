@@ -3,7 +3,7 @@ from typing import Generator
 
 import simpy
 
-from .abc import Consumer, Node, Part, Producer
+from .abc import Consumer, Node, Part, Producer, RoutingLogic
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +15,7 @@ class Conveyor(Node, Consumer, Producer):
         name: str,
         travel_time: float = 1.0,
         capacity: int = 1,
+        routing_strategy: RoutingLogic = "round_robin",
     ) -> None:
         super().__init__(env, name)
 
@@ -25,8 +26,12 @@ class Conveyor(Node, Consumer, Producer):
             f" capacity={capacity}"
         )
 
+        self.routing_strategy = routing_strategy
+        self.output_targets = []
+        self.next_target_idx = 0
+
     def set_output(self, output_target: Consumer) -> None:
-        self.output_target = output_target
+        self.output_targets.append(output_target)
 
     def put(self, part: Part) -> None:
         """Receives a part and starts the transport process."""
@@ -47,6 +52,5 @@ class Conveyor(Node, Consumer, Producer):
             yield self.env.timeout(self.travel_time)
 
         logger.debug(f"Conveyor '{self.name}' completed transport of {part_id}")
-        if self.output_target:
-            self._record_part_sent(part)
-            self.output_target.put(part)
+        self.route_part(part)
+        self._record_part_sent(part)

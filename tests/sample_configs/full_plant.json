@@ -3,25 +3,26 @@
         {
             "name": "source",
             "type": "Source",
-            "outputs": "conveyor"
+            "outputs": ["conveyor"],
+            "params": {
+                "interval": 5.0
+            }
         },
         {
             "name": "conveyor",
             "type": "Conveyor",
-            "outputs": "station"
+            "outputs": ["station"],
+            "params": {
+                "travel_time": 5.0
+            }
         },
         {
             "name": "station",
             "type": "Station",
-            "outputs": "router"
-        },
-        {
-            "name": "router",
-            "type": "Router",
+            "outputs": ["drain1", "drain2"],
             "params": {
-                "routing_logic": "round_robin"
-            },
-            "outputs": ["drain1", "drain2"]
+                "processing_time": 5.0
+            }
         },
         {
             "name": "drain1",

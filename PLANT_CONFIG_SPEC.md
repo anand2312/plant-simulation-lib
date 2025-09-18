@@ -39,6 +39,7 @@ Generates parts at a regular interval.
   - `interval` (float, optional, default: `1.0`): The time (in simulation units) between part generations.
   - `limit` (integer, optional, default: `null`): The maximum number of parts to generate. If `null`, generates indefinitely.
   - `start_immediately` (boolean, optional, default: `true`): If `true`, starts generating parts at t=0.
+  - `routing_strategy` (string, optional, default: `"round_robin"`): The routing logic when multiple outputs are defined. Valid options are `"round_robin"` and `"random"`.
 
 ### `Drain`
 Consumes and removes parts from the simulation, recording statistics.
@@ -49,17 +50,15 @@ Transports a part from one point to another, taking a specific amount of time.
 - **`params`**:
   - `travel_time` (float, optional, default: `1.0`): The time it takes for a part to travel across the conveyor.
   - `capacity` (integer, optional, default: `1`): The number of parts the conveyor can transport simultaneously.
+  - `routing_strategy` (string, optional, default: `"round_robin"`): The routing logic when multiple outputs are defined. Valid options are `"round_robin"` and `"random"`.
 
 ### `Station`
 Represents a workstation that processes a part, taking a specific amount of time.
 - **`params`**:
   - `processing_time` (float, optional, default: `1.0`): The time it takes to process one part.
   - `capacity` (integer, optional, default: `1`): The number of parts the station can process simultaneously.
+  - `routing_strategy` (string, optional, default: `"round_robin"`): The routing logic when multiple outputs are defined. Valid options are `"round_robin"` and `"random"`.
 
-### `Router`
-Routes incoming parts to one of several downstream components.
-- **`params`**:
-  - `routing_logic` (string, optional, default: `"round_robin"`): The logic to use for routing. Valid options are `"round_robin"` and `"random"`.
 
 
 ---
@@ -68,7 +67,7 @@ Routes incoming parts to one of several downstream components.
 
 ### Valid Configuration Example
 
-This example shows a source feeding a conveyor, which moves parts to a station. The station then sends parts to a router, which distributes them to two different drains.
+This example shows a source feeding a conveyor, which moves parts to a station. The station then distributes parts to two different drains using its built-in routing capability.
 
 ```json
 {
@@ -88,13 +87,7 @@ This example shows a source feeding a conveyor, which moves parts to a station. 
     {
       "name": "processing_station",
       "type": "Station",
-      "params": { "processing_time": 8.0, "capacity": 2 },
-      "outputs": "main_router"
-    },
-    {
-      "name": "main_router",
-      "type": "Router",
-      "params": { "routing_logic": "round_robin" },
+      "params": { "processing_time": 8.0, "capacity": 2, "routing_strategy": "round_robin" },
       "outputs": ["finished_parts_drain", "qa_inspection_drain"]
     },
     {

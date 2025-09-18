@@ -3,7 +3,7 @@ from typing import Generator
 
 import simpy
 
-from .abc import Consumer, Node, Part, Producer
+from .abc import Consumer, Node, Part, Producer, RoutingLogic
 
 logger = logging.getLogger(__name__)
 
@@ -17,10 +17,14 @@ class Station(Node, Consumer, Producer):
         name: str,
         processing_time: float = 1.0,
         capacity: int = 1,
+        routing_strategy: RoutingLogic = "round_robin",
     ) -> None:
         super().__init__(env, name)
 
-        self.output_target: Consumer | None = None
+        self.output_targets: list[Consumer] = []
+        self.next_target_idx = 0
+        self.routing_strategy = routing_strategy
+
         self.processing_time = processing_time
         self.resource = simpy.Resource(env, capacity=capacity)
 
@@ -30,7 +34,7 @@ class Station(Node, Consumer, Producer):
         )
 
     def set_output(self, output_target: Consumer) -> None:
-        self.output_target = output_target
+        self.output_targets.append(output_target)
 
     def put(self, part: Part) -> None:
         """Receives a part and starts the processing workflow."""
@@ -56,6 +60,6 @@ class Station(Node, Consumer, Producer):
                 f"Station '{self.name}' completed {part_id} at T={self.env.now}"
             )
 
-        if self.output_target:
+        if self.output_targets:
             self._record_part_sent(part)
-            self.output_target.put(part)
+            self.route_part(part)
