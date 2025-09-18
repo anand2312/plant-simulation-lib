@@ -43,7 +43,9 @@ Generates parts at a regular interval.
 
 ### `Drain`
 Consumes and removes parts from the simulation, recording statistics.
-- **`params`**: None.
+- **`params`**:
+  - `capacity` (integer, optional, default: `1`): The number of parts the drain can process simultaneously.
+  - `drain_time` (float, optional, default: `0.0`): The time it takes to process each part before removing it from the simulation.
 
 ### `Conveyor`
 Transports a part from one point to another, taking a specific amount of time.
