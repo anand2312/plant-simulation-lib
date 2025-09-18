@@ -55,7 +55,7 @@ class Simulation:
             try:
                 throughput = component.get_throughput()
             except ZeroDivisionError:
-                throughput = float("nan")
+                throughput = 0.0
             avg_latency = component.get_average_latency()
             max_latency = component.get_max_latency()
             utilization_time = component.get_utilization_time()
